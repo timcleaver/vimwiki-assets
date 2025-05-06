@@ -229,6 +229,37 @@
                 return '<span style="color: ' + group1 + '">' + group1 + "</span>";
             }));
         });
+
+        // Finds all <ul>s nested inside other <ul>s, Wraps their parent <li>'s contents in a toggle link, Adds Bootstrap
+        // collapse behavior and toggle icons.
+        // don't apply to .done* as it doesn't work for those for some reason.
+        $('ul:not(.nav-list) li:not(.done0):not(.done1):not(.done2):not(.done3):not(done4) ul').each(function (i) {
+            var $subList = $(this);
+            var $parentLi = $subList.closest('li');
+            var id = 'collapse-' + i;
+
+            // Assign ID to the nested <ul>
+            $subList.attr('id', id).addClass('collapse');
+
+            var $existingLink = $parentLi.children('a').first(); // keep original link
+
+            // Create a separate chevron icon link for toggling collapse
+            var $chevronToggle = $(
+                '<a href="#' + id + '" data-toggle="collapse" class="chevron-toggle" ' +
+                'style="margin-left: 6px; cursor: pointer;"><i class="fa fa-chevron-right"></i></a>'
+            );
+
+            // Prevent chevron click from triggering navigation
+            $chevronToggle.on('click', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                $('#' + id).collapse('toggle');
+                $(this).find('i').toggleClass('fa-chevron-right fa-chevron-down');
+            });
+
+            // Insert the chevron toggle right after the original link
+            $existingLink.after($chevronToggle);
+        });
     });
 
     $('pre').each(function() {

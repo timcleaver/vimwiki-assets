@@ -9,7 +9,7 @@ Vimwiki Template
 # using vimwiki assets
 ```sh
 $ cd $HOME/vimwiki_html/
-$ git clone https://github.com/coderiot/vimwiki-assets.git assets
+$ git clone https://github.com/timcleaver/vimwiki-assets.git assets
 ```
 
 # .vimrc settings

@@ -225,7 +225,9 @@
         });
 
         $("body").children().each(function() {
-            $(this).html($(this).html().replace(/ \| project:\s*\w+/g, ""));
+            $(this).html($(this).html().replace(/ \| project:\s*\w+/g, "").replace(/(#[a-f0-9]{6})[a-f0-9]{2}/g, function(match, group1) {
+                return '<span style="color: ' + group1 + '">' + group1 + "</span>";
+            }));
         });
     });
 

@@ -267,7 +267,7 @@
         // Finds all <ul>s nested inside other <ul>s, Wraps their parent <li>'s contents in a toggle link, Adds Bootstrap
         // collapse behavior and toggle icons.
         // don't apply to .done* as it doesn't work for those for some reason.
-        $('ul:not(.nav-list) li:not(.done0):not(.done1):not(.done2):not(.done3):not(done4) ul').each(function (i) {
+        $('ul:not(.nav-list) li:not(.done0):not(.done1):not(.done2):not(.done3):not(.done4) ul').each(function (i) {
             var $subList = $(this);
             var $parentLi = $subList.closest('li');
             var id = 'collapse-' + i;

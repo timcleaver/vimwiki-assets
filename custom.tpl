@@ -11,6 +11,36 @@
 <link type="text/css" rel="stylesheet" href="%root_path%assets/css/vimwiki.css" />
 <link type="text/css" rel="stylesheet" href="%root_path%assets/css/font-awesome.css">
 
+<style>
+    .day {
+        position: absolute;
+        top: 0.5em;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /*font-size: 18px; /* Adjust day number size */
+        font-size: 0.6em;
+        color: #000; /* Adjust day number color */
+        /*font-weight: bold;*/
+    }
+
+    .calendar-emoji {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        /*font-size: 40px; /* Adjust emoji size */
+        /*width: 50px; /* Set width of the calendar box */
+        /*height: 50px; /* Set height of the calendar box */
+        /*background-color: #f0f0f0; /* Optional: background color */
+        border-radius: 8px; /* Optional: rounded corners */
+        position: relative;
+    }
+</style>
+
+
 <script type="text/javascript" src="%root_path%assets/js/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="%root_path%assets/js/bootstrap-2.3.0.js"></script>
 <script type="text/javascript" src="%root_path%assets/js/highlight.pack.js"></script>
@@ -66,6 +96,7 @@
             <ul id="sidebar_list" class="nav nav-list bs-docs-sidenav affix">
             </ul>
         </div>
+
 
         <div class="span7">
             <!--Body content-->
@@ -227,6 +258,9 @@
         $("body").children().each(function() {
             $(this).html($(this).html().replace(/ \| project:\s*\w+/g, "").replace(/(#[a-f0-9]{6})[a-f0-9]{2}/g, function(match, group1) {
                 return '<span style="color: ' + group1 + '">' + group1 + "</span>";
+            }).replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*📅/g, function(match, group1) {
+                var dayOfMonth = new Date(group1).getDate();
+                return `${group1} <span class="calendar-emoji">🗓️ <span class="day">${dayOfMonth}</span></span>`
             }));
         });
 

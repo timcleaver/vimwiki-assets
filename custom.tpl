@@ -223,6 +223,10 @@
             $("html, body").animate({ scrollTop: 0 }, 600);
             return false;
         });
+
+        $("body").children().each(function() {
+            $(this).html($(this).html().replace(/ \| project:\s*\w+/g, ""));
+        });
     });
 
     $('pre').each(function() {

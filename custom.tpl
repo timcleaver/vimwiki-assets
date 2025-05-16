@@ -100,7 +100,7 @@
         </div>
 
 
-        <div class="span7">
+        <div id="content" class="span7">
             <!--Body content-->
             %content%
 
@@ -338,6 +338,13 @@
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             toggleTheme();
+        }
+    });
+
+    // hide empty h2s
+    $('div > h2').each(function() {
+        if ($(this).parent().nextAll().first().is('div') || $(this).parent().nextAll().length === 0) {
+            $(this).hide();
         }
     });
 

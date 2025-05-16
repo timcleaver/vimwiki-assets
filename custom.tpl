@@ -126,123 +126,137 @@
     $('h1').wrap('<div class="well well-small" />');
 
     $(document).ready(function() {
-        var items = [];
-        <!-- the header items are not nested. the h2s are not "inside" the h1 in the DOM. -->
-        $('h1').each(function() {
-            items.push('<li><a href="#' + this.id + '"><i class="fa fa-chevron-right pull-right"></i> ' + $(this).text() + '</a>');
-            items.push('<ul class="nav-list">')
-            $('h2').each(function() {
-                items.push('<li><a href="#' + this.id + '"><i class="fa fa-chevron-right pull-right"></i> ' + $(this).text() + '</a>');
-            })
-            items.push('</ul>')
-            items.push('</li>')
-        });  // close each()
+        $(function() {
+            var items = [];
+            <!-- the header items are not nested. the h2s are not "inside" the h1 in the DOM. -->
+            $('h1').each(function() {
+                items.push('<li class="nav-header"><a class="toggle-submenu" href="#' + this.id + '"><i class="fa fa-chevron-right pull-right"></i> ' + $(this).text() + '</a>');
+                items.push('<ul class="nav nav-list submenu" style="display: none;">');
+                let year_id = this.id;
+                <!-- find all the nodes starting with the current year- -->
+                $(`[id^="${year_id}-"]`).each(function() {
+                    items.push('<li><a href="#' + this.id + '"><i class="fa fa-chevron-right pull-right"></i> ' + $(this).text() + '</a>');
+                })
+                items.push('</ul>');
+                items.push('</li>');
+            });  // close each()
 
-    $('#sidebar_list').append( items.join('') );
+            $('#sidebar_list').append(items.join(''));
 
-    $('table').each(function() {
-        $(this).addClass('table table-striped table-condensed table-hover');
-    });
+            console.log($('#sidebar_list'));
+            
+            $('#sidebar_list').on('click', '.toggle-submenu', function(e) {
+                e.preventDefault();
+                console.log("HELLO");
+                const $submenu = $(this).siblings('.submenu');
+                $submenu.slideToggle(200);
+                const $icon = $(this).find('i');
+                $icon.toggleClass('fa-chevron-right fa-chevron-down');
+            });
+        });
 
-    $('.done0').each(function() {
-        $(this).html(`
-            <div class="alert alert-info" style="overflow: hidden;">
-                    <div style="float: left; margin-right: 10px;">
-                        <i class="fa fa-square-o"></i>
-                        ${$(this).html()}
-                    </div>
-                    <div style="float: right; width: 150px;">
-                        <div class="progress" style="margin: 0;">
-                            <div class="bar bar-danger" style="width: 0%;"></div>
+        $('table').each(function() {
+            $(this).addClass('table table-striped table-condensed table-hover');
+        });
+
+        $('.done0').each(function() {
+            $(this).html(`
+                <div class="alert alert-info" style="overflow: hidden;">
+                        <div style="float: left; margin-right: 10px;">
+                            <i class="fa fa-square-o"></i>
+                            ${$(this).html()}
+                        </div>
+                        <div style="float: right; width: 150px;">
+                            <div class="progress" style="margin: 0;">
+                                <div class="bar bar-danger" style="width: 0%;"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-        `);
-        $(this).css("list-style", "none");
-        //$(this).parent().css("list-style", "none");
-    });
+                </li>
+            `);
+            $(this).css("list-style", "none");
+            //$(this).parent().css("list-style", "none");
+        });
 
-    $('.done1').each(function() {
-        $(this).html(`
-             <div class="alert alert-info" style="overflow: hidden;">
-                    <div style="float: left; margin-right: 10px;">
-                        <i class="fa fa-minus-square-o"></i>
-                        ${$(this).html()}
-                    </div>
-                    <div style="float: right; width: 150px;">
-                        <div class="progress" style="margin: 0;">
-                            <div class="bar bar-warning" style="width: 33%;">33%</div>
+        $('.done1').each(function() {
+            $(this).html(`
+                 <div class="alert alert-info" style="overflow: hidden;">
+                        <div style="float: left; margin-right: 10px;">
+                            <i class="fa fa-minus-square-o"></i>
+                            ${$(this).html()}
+                        </div>
+                        <div style="float: right; width: 150px;">
+                            <div class="progress" style="margin: 0;">
+                                <div class="bar bar-warning" style="width: 33%;">33%</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-        `);
-        $(this).css("list-style", "none");
-        //$(this).parent().css("list-style", "none");
-    });
+                </li>
+            `);
+            $(this).css("list-style", "none");
+            //$(this).parent().css("list-style", "none");
+        });
 
-    $('.done2').each(function() {
-        $(this).html(`
-            <div class="alert alert-info" style="overflow: hidden;">
-                    <div style="float: left; margin-right: 10px;">
-                        <i class="fa fa-circle-o"></i>
-                        ${$(this).html()}
-                    </div>
-                    <div style="float: right; width: 150px;">
-                        <div class="progress" style="margin: 0;">
-                            <div class="bar" style="width: 66%;">66%</div>
+        $('.done2').each(function() {
+            $(this).html(`
+                <div class="alert alert-info" style="overflow: hidden;">
+                        <div style="float: left; margin-right: 10px;">
+                            <i class="fa fa-circle-o"></i>
+                            ${$(this).html()}
+                        </div>
+                        <div style="float: right; width: 150px;">
+                            <div class="progress" style="margin: 0;">
+                                <div class="bar" style="width: 66%;">66%</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-        `);
-        $(this).css("list-style", "none");
-        //$(this).parent().css("list-style", "none");
-    });
+                </li>
+            `);
+            $(this).css("list-style", "none");
+            //$(this).parent().css("list-style", "none");
+        });
 
-    $('.done3').each(function() {
-        $(this).html(`
-            <div class="alert alert-info" style="overflow: hidden;">
-                    <div style="float: left; margin-right: 10px;">
-                        <i class="fa fa-dot-circle-o"></i>
-                        ${$(this).html()}
-                    </div>
-                    <div style="float: right; width: 150px;">
-                        <div class="progress" style="margin: 0;">
-                            <div class="bar" style="width: 99%;">99%</div>
+        $('.done3').each(function() {
+            $(this).html(`
+                <div class="alert alert-info" style="overflow: hidden;">
+                        <div style="float: left; margin-right: 10px;">
+                            <i class="fa fa-dot-circle-o"></i>
+                            ${$(this).html()}
+                        </div>
+                        <div style="float: right; width: 150px;">
+                            <div class="progress" style="margin: 0;">
+                                <div class="bar" style="width: 99%;">99%</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-        `);
-        $(this).css("list-style", "none");
-        //$(this).parent().css("list-style", "none");
-    });
+                </li>
+            `);
+            $(this).css("list-style", "none");
+            //$(this).parent().css("list-style", "none");
+        });
 
-    $('.done4').each(function() {
-        $(this).html(`
-                <div class="alert alert-success" style="overflow: hidden;">
-                    <div style="float: left; margin-right: 10px;">
-                        <i class="fa fa-check-square-o"></i>
-                        ${$(this).html()}
-                    </div>
-                    <div style="float: right; width: 150px;">
-                        <div class="progress" style="margin: 0;">
-                            <div class="bar bar-success" style="width: 100%;">100%</div>
+        $('.done4').each(function() {
+            $(this).html(`
+                    <div class="alert alert-success" style="overflow: hidden;">
+                        <div style="float: left; margin-right: 10px;">
+                            <i class="fa fa-check-square-o"></i>
+                            ${$(this).html()}
+                        </div>
+                        <div style="float: right; width: 150px;">
+                            <div class="progress" style="margin: 0;">
+                                <div class="bar bar-success" style="width: 100%;">100%</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-        `);
-        $(this).css("list-style", "none");
-        //$(this).parent().css("list-style", "none");
-    });
+                </li>
+            `);
+            $(this).css("list-style", "none");
+            //$(this).parent().css("list-style", "none");
+        });
 
-    // Fade Out Back-To-Top-Link on new page
-    $('.backtotop').fadeOut();
+        // Fade Out Back-To-Top-Link on new page
+        $('.backtotop').fadeOut();
 
-    $(document).ready(function(){
         $(window).scroll(function(){
             if ($(this).scrollTop() > 100) {
                 $('.backtotop').fadeIn();
@@ -255,13 +269,21 @@
             return false;
         });
 
+        <!-- use the taskwarrior ids to color their text -->
         $("body").children().each(function() {
             $(this).html($(this).html().replace(/ \| project:\s*\w+/g, "").replace(/(#[a-f0-9]{6})[a-f0-9]{2}/g, function(match, group1) {
                 return '<span style="color: ' + group1 + '">' + group1 + "</span>";
-            }).replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*📅/g, function(match, group1) {
+            }))
+        });
+
+        <!-- replace date only links with emoji with calculated dates -->
+        $('a').filter(function() {
+            return /([0-9]{4}-[0-9]{2}-[0-9]{2})\s*📅/.test($(this).text());
+        }).each(function() {
+            $(this).html($(this).text().replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*📅/g, function(match, group1) {
                 var dayOfMonth = new Date(group1).getDate();
                 return `${group1} <span class="calendar-emoji">🗓️ <span class="day">${dayOfMonth}</span></span>`
-            }));
+            }))
         });
 
         // Finds all <ul>s nested inside other <ul>s, Wraps their parent <li>'s contents in a toggle link, Adds Bootstrap
@@ -302,7 +324,6 @@
         $(this).html('<code>'+$(this).html()+'</code>');
     });
     hljs.initHighlightingOnLoad();
-});
 </script>
 </body>
 </html>

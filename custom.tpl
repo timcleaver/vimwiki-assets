@@ -348,6 +348,13 @@
         }
     });
 
+    // make the list of dates 4 columns wide
+    if (document.title !== "index") {
+        $('#content > ul').each(function() {
+            $(this).css({ 'column-count': 4 });
+        });
+    }
+
     $('pre').each(function() {
         $(this).html('<code>'+$(this).html()+'</code>');
     });

@@ -4,7 +4,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<link type="text/css" rel="stylesheet" href="%root_path%assets/css/bootstrap.css" />
+<link id="theme-stylesheet" type="text/css" rel="stylesheet" href="%root_path%assets/css/bootstrap.css" />
+
 <link type="text/css" rel="stylesheet" href="%root_path%assets/css/bootstrap-responsive.css" />
 <link type="text/css" rel="stylesheet" href="%root_path%assets/css/docs.css" />
 <link type="text/css" rel="stylesheet" href="%root_path%assets/css/monokai.css" />
@@ -59,8 +60,9 @@
                 <span class="icon-bar"></span>
             </a>
 
+            <button id="themeToggle" onclick="toggleTheme()" style="background-color: transparent; border: none; display: block;float: right; height: 40px; line-height: 40px;">🌙</button>
             <!-- Be sure to leave the brand out there if you want it shown -->
-            <a class="brand" href="http://code.google.com/p/vimwiki/">Vimwiki</a>
+            <!-- <a class="brand" href="http://code.google.com/p/vimwiki/">Vimwiki</a> -->
 
             <!-- Everything you want hidden at 940px or less, place within here -->
             <div class="nav-collapse collapse">
@@ -130,12 +132,12 @@
             var items = [];
             <!-- the header items are not nested. the h2s are not "inside" the h1 in the DOM. -->
             $('h1').each(function() {
-                items.push('<li class="nav-header"><a class="toggle-submenu" href="#' + this.id + '"><i class="fa fa-chevron-right pull-right"></i> ' + $(this).text() + '</a>');
+                items.push('<li class="nav-header"><a class="toggle-submenu" href="#' + this.id + '"><i class="fa fa-chevron-right pull-right" style="line-height: 20px"></i> ' + $(this).text() + '</a>');
                 items.push('<ul class="nav nav-list submenu" style="display: none;">');
                 let year_id = this.id;
                 <!-- find all the nodes starting with the current year- -->
                 $(`[id^="${year_id}-"]`).each(function() {
-                    items.push('<li><a href="#' + this.id + '"><i class="fa fa-chevron-right pull-right"></i> ' + $(this).text() + '</a>');
+                    items.push('<li><a href="#' + this.id + '"><i class="fa fa-chevron-right pull-right" style="line-height: 20px"></i> ' + $(this).text() + '</a>');
                 })
                 items.push('</ul>');
                 items.push('</li>');
@@ -143,8 +145,6 @@
 
             $('#sidebar_list').append(items.join(''));
 
-            console.log($('#sidebar_list'));
-            
             $('#sidebar_list').on('click', '.toggle-submenu', function(e) {
                 e.preventDefault();
                 console.log("HELLO");
@@ -317,6 +317,27 @@
                 // Insert the chevron toggle right after the original link
                 $existingLink.after($chevronToggle);
             });
+        }
+    });
+
+    function toggleTheme() {
+        const themeLink = document.getElementById("theme-stylesheet");
+        if (themeLink.getAttribute("href") === "%root_path%assets/css/bootstrap.css") {
+            themeLink.setAttribute("href", "%root_path%assets/css/bootstrap-dark.css");
+            document.getElementById('themeToggle').textContent = '☀️';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            themeLink.setAttribute("href", "%root_path%assets/css/bootstrap.css");
+            document.getElementById('themeToggle').textContent = '🌙';
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    // Apply saved theme on load
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggleTheme();
         }
     });
 

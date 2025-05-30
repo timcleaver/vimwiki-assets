@@ -128,6 +128,20 @@
     $('h1').wrap('<div class="well well-small" />');
 
     $(document).ready(function() {
+        // make the list of dates 4 columns wide
+        if (document.title === "diary") {
+            $('#content > ul').each(function() {
+                $(this).css({ 'column-count': 4 });
+            });
+        } else {
+            // hide empty h2s on non diary pages
+            $('div > h2').each(function() {
+                if ($(this).parent().nextAll().first().is('div') || $(this).parent().nextAll().length === 0) {
+                    $(this).parent().remove();
+                }
+            });
+        }
+
         $(function() {
             var items = [];
             <!-- the header items are not nested. the h2s are not "inside" the h1 in the DOM. -->
@@ -348,20 +362,6 @@
             toggleTheme();
         }
     });
-
-    // make the list of dates 4 columns wide
-    if (document.title === "diary") {
-        $('#content > ul').each(function() {
-            $(this).css({ 'column-count': 4 });
-        });
-    } else {
-        // hide empty h2s on non diary pages
-        $('div > h2').each(function() {
-            if ($(this).parent().nextAll().first().is('div') || $(this).parent().nextAll().length === 0) {
-                $(this).hide();
-            }
-        });
-    }
 
     $('pre').each(function() {
         $(this).html('<code>'+$(this).html()+'</code>');

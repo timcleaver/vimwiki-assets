@@ -349,7 +349,7 @@
         }
     });
 
-        // make the list of dates 4 columns wide
+    // make the list of dates 4 columns wide
     if (document.title === "diary") {
         $('#content > ul').each(function() {
             $(this).css({ 'column-count': 4 });

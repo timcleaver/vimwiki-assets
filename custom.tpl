@@ -147,7 +147,6 @@
 
             $('#sidebar_list').on('click', '.toggle-submenu', function(e) {
                 e.preventDefault();
-                console.log("HELLO");
                 const $submenu = $(this).siblings('.submenu');
                 $submenu.slideToggle(200);
                 const $icon = $(this).find('i');
@@ -318,6 +317,15 @@
                 $existingLink.after($chevronToggle);
             });
         }
+
+        // Find all divs with IDs matching the pattern "Diary-YYYY"
+        $('div[id^="Diary-"]').each(function() {
+            // Check if the ID matches the exact pattern (Diary- followed by 4 digits)
+            if ($(this).attr('id').match(/^Diary-\d{4}$/)) {
+                // Insert an hr element before this div
+                $(this).before('<hr class="year-separator">');
+            }
+        });
     });
 
     function toggleTheme() {
@@ -341,17 +349,17 @@
         }
     });
 
-    // hide empty h2s
-    $('div > h2').each(function() {
-        if ($(this).parent().nextAll().first().is('div') || $(this).parent().nextAll().length === 0) {
-            $(this).hide();
-        }
-    });
-
-    // make the list of dates 4 columns wide
-    if (document.title !== "index") {
+        // make the list of dates 4 columns wide
+    if (document.title === "diary") {
         $('#content > ul').each(function() {
             $(this).css({ 'column-count': 4 });
+        });
+    } else {
+        // hide empty h2s on non diary pages
+        $('div > h2').each(function() {
+            if ($(this).parent().nextAll().first().is('div') || $(this).parent().nextAll().length === 0) {
+                $(this).hide();
+            }
         });
     }
 

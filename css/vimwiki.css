@@ -43,3 +43,10 @@ li.done4 {
     text-decoration:none;
     color: #0088cc;
 }
+
+hr.year-separator {
+  height: 5px;
+  border: none;
+  background: linear-gradient(to right, transparent, #666, transparent);
+  margin: 25px 0;
+}

@@ -1,0 +1,182 @@
+<!doctype html>
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  lang="$lang$"
+  xml:lang="$lang$"
+  $if(dir)$
+  dir="$dir$"
+  $endif$
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="pandoc" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    $for(author-meta)$
+    <meta name="author" content="$author-meta$" />
+    $endfor$ $if(date-meta)$
+    <meta name="dcterms.date" content="$date-meta$" />
+    $endif$ $if(keywords)$
+    <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+    $endif$ $if(description-meta)$
+    <meta name="description" content="$description-meta$" />
+    $endif$
+    <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+    $for(css)$
+    <link rel="stylesheet" href="$css$" />
+    $endfor$
+    <link
+      id="theme-stylesheet"
+      type="text/css"
+      rel="stylesheet"
+      href="./assets/css/bootstrap.css"
+    />
+
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="./assets/css/bootstrap-responsive.css"
+    />
+    <link type="text/css" rel="stylesheet" href="./assets/css/docs.css" />
+    <link type="text/css" rel="stylesheet" href="./assets/css/monokai.css" />
+    <link type="text/css" rel="stylesheet" href="./assets/css/vimwiki.css" />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="./assets/css/font-awesome.css"
+    />
+
+    <script type="text/javascript" src="./assets/js/jquery-1.9.1.js"></script>
+    <script
+      type="text/javascript"
+      src="./assets/js/bootstrap-2.3.0.js"
+    ></script>
+    <script type="text/javascript" src="./assets/js/highlight.pack.js"></script>
+
+    $for(header-includes)$ $header-includes$ $endfor$ $if(math)$ $math$ $endif$
+  </head>
+  <body data-spy="scroll">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+          <a
+            class="btn btn-navbar"
+            data-toggle="collapse"
+            data-target=".nav-collapse"
+          >
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+
+          <button
+            id="themeToggle"
+            onclick="toggleTheme()"
+            style="
+              background-color: transparent;
+              border: none;
+              display: block;
+              float: right;
+              height: 40px;
+              line-height: 40px;
+            "
+          >
+            🌙
+          </button>
+          <!-- Be sure to leave the brand out there if you want it shown -->
+          <!-- <a class="brand" href="http://code.google.com/p/vimwiki/">Vimwiki</a> -->
+
+          <!-- Everything you want hidden at 940px or less, place within here -->
+          <div class="nav-collapse collapse">
+            <!-- .nav, .navbar-search, .navbar-form, etc -->
+            <ul class="nav">
+              <li class="">
+                <a href="./index.html">Index</a>
+              </li>
+              <!-- ><li class="">
+                        <a href="./workspace/index.html">Workspace</a>
+                    </li>
+                    -->
+              <li class="">
+                <a href="./diary/diary.html">Diary</a>
+              </li>
+              <li class="">
+                <a href="./flight_centre.glossary.html"
+                  >Flight Centre Glossary</a
+                >
+              </li>
+              <!--
+                    <li class="">
+                        <a href="#">Calendar</a>
+                    </li>
+                    <li class="">
+                        <a href="./todo.html">To Do</a>
+                    </li>
+                    -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">$body$</div>
+    <a href="#" class="backtotop"
+      ><i class="fa fa-arrow-circle-up fa-4x"></i
+    ></a>
+    <!-- Footer
+    ================================================== -->
+    <footer class="footer">
+      <div class="container">
+        <p>
+          <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
+          licensed under
+          <a href="http://www.apache.org/licenses/LICENSE-2.0"
+            >Apache License v2.0</a
+          >.
+        </p>
+        <p>
+          <a href="http://fortawesome.github.com/Font-Awesome">Font Awesome</a>
+          licensed under
+          <a href="http://scripts.sil.org/OFL">SIL Open Font License</a>.
+        </p>
+        <p>
+          <a href="http://softwaremaniacs.org/soft/highlight/en/"
+            >highlight.js</a
+          >
+          licensed under
+          <a href="http://opensource.org/licenses/BSD-3-Clause"
+            >Modified BSD License</a
+          >.
+        </p>
+        <ul class="footer-links"></ul>
+      </div>
+    </footer>
+    <script>
+      function toggleTheme() {
+        const themeLink = document.getElementById("theme-stylesheet");
+        if (themeLink.getAttribute("href") === "./assets/css/bootstrap.css") {
+          themeLink.setAttribute("href", "./assets/css/bootstrap-dark.css");
+          document.getElementById("themeToggle").textContent = "☀️";
+          localStorage.setItem("theme", "dark");
+        } else {
+          themeLink.setAttribute("href", "./assets/css/bootstrap.css");
+          document.getElementById("themeToggle").textContent = "🌙";
+          localStorage.setItem("theme", "light");
+        }
+      }
+
+      // Apply saved theme on load
+      window.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+          toggleTheme();
+        }
+      });
+
+      hljs.initHighlightingOnLoad();
+    </script>
+  </body>
+</html>

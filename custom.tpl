@@ -78,6 +78,9 @@
                     <li class="">
                         <a href="%root_path%diary/diary.html">Diary</a>
                     </li>
+                    <li class="">
+                        <a href="%root_path%flight_centre.glossary.html">Flight Centre Glossary</a>
+                    </li>
                     <!--
                     <li class="">
                         <a href="#">Calendar</a>

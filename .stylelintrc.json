@@ -2,7 +2,10 @@
   "extends": "stylelint-config-standard",
   "rules": {
     "declaration-block-no-duplicate-properties": [true, {
-      "ignore": ["consecutive-duplicates-with-different-values"]
-    }]
+      "ignore": ["consecutive-duplicates-with-different-values", "consecutive-duplicates-with-same-prefixless-values"]
+    }],
+    "property-no-vendor-prefix": null,
+    "value-no-vendor-prefix": null,
+    "no-descending-specificity": null
   }
 }

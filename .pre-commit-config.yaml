@@ -11,15 +11,15 @@ repos:
         args: ['--fix=lf']
 
   - repo: https://github.com/thibaudcolas/pre-commit-stylelint
-    rev: v16.19.1
+    rev: v16.20.0
     hooks:
       - id: stylelint
         additional_dependencies:
-          - stylelint@14.16.1
-          - stylelint-config-standard@29.0.0
+          - stylelint@16.20.0
+          - stylelint-config-standard@38.0.0
 
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.27.0
+    rev: v9.28.0
     hooks:
       - id: eslint
         files: \.(js)$

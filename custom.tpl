@@ -71,6 +71,9 @@
                     <li class="">
                         <a href="%root_path%index.html">Index</a>
                     </li>
+                    <li class="">
+                        <a href="%root_path%README.html">Read Me</a>
+                    </li>
                     <!-- ><li class="">
                         <a href="%root_path%workspace/index.html">Workspace</a>
                     </li>

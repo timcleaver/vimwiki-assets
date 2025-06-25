@@ -96,6 +96,9 @@
               <li class="">
                 <a href="./index.html">Index</a>
               </li>
+              <li class="">
+                <a href="./README.html">Read Me</a>
+              </li>
               <!-- ><li class="">
                         <a href="./workspace/index.html">Workspace</a>
                     </li>

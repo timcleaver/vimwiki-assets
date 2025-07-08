@@ -27,6 +27,10 @@ repos:
         additional_dependencies:
           - eslint@8.38.0
           - eslint-config-standard@17.0.0
+          - eslint-plugin-n@15.3.0          # add this
+          - eslint-plugin-import@2.27.5     # also add this (required by standard)
+          - eslint-plugin-promise@6.1.1     # also add this
+          - eslint-plugin-node@11.1.0       # sometimes this too (alias of n plugin)
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8

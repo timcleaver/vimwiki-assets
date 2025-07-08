@@ -48,7 +48,10 @@
       href="./assets/css/font-awesome.css"
     />
 
-    <script type="text/javascript" src="./assets/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="./assets/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="./assets/js/jquery-migrate-3.4.1.min.js"></script>
+
+
     <script
       type="text/javascript"
       src="./assets/js/bootstrap-2.3.0.js"

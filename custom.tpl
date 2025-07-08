@@ -128,14 +128,29 @@
   </div>
 </footer>
 <script>
-    $('h1').each(function() {
-        $(this).wrap('<section id="' + this.id + '"/>');
-    });
-
-    $('h1').wrap('<div class="page-header" />');
-    $('h1').wrap('<div class="well well-small" />');
-
     $(document).ready(function() {
+        $('[id]').each(function () {
+            const oldId = this.id;
+            const newId = oldId
+              .normalize('NFKD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/[^\w\-]+/g, '-')
+              .replace(/^-+|-+$/g, '')
+              .toLowerCase();
+
+            if (newId !== oldId) {
+              this.id = newId;
+              $(`a[href="#${CSS.escape(oldId)}"]`).attr('href', `#${newId}`);
+            }
+        });
+
+        $('h1').each(function() {
+            $(this).wrap('<section id="' + this.id + '"/>');
+        });
+
+        $('h1').wrap('<div class="page-header" />');
+        $('h1').wrap('<div class="well well-small" />');
+
         // make the list of dates 4 columns wide
         if (document.title === "diary") {
             $('#content > ul').each(function() {

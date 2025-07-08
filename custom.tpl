@@ -42,7 +42,10 @@
 </style>
 
 
-<script type="text/javascript" src="%root_path%assets/js/jquery-1.9.1.js"></script>
+<!--<script type="text/javascript" src="%root_path%assets/js/jquery-1.9.1.js"></script>-->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-3.4.1.min.js"></script>
+
 <script type="text/javascript" src="%root_path%assets/js/bootstrap-2.3.0.js"></script>
 <script type="text/javascript" src="%root_path%assets/js/highlight.pack.js"></script>
 
@@ -172,6 +175,21 @@
                 const $icon = $(this).find('i');
                 $icon.toggleClass('fa-chevron-right fa-chevron-down');
             });
+
+            <!-- replace date only links with emoji with calculated dates -->
+            $('a').filter(function() {
+                return /([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/u.test($(this).text());
+            }).each(function() {
+                console.log($(this).text());
+                console.log($(this).html())
+                $(this).html($(this).html().replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/ug, function(match, group1) {
+                    console.log($(this).text());
+                    console.log(match);
+                    console.log(group1);
+                    var dayOfMonth = new Date(group1).getDate();
+                    return `${group1} <span class="calendar-emoji">🗓️ <span class="day">${dayOfMonth}</span></span>`
+                }))
+            });
         });
 
         $('table').each(function() {
@@ -295,20 +313,10 @@
             }))
         });
 
-        <!-- replace date only links with emoji with calculated dates -->
-        $('a').filter(function() {
-            return /([0-9]{4}-[0-9]{2}-[0-9]{2})\s*📅/.test($(this).text());
-        }).each(function() {
-            $(this).html($(this).text().replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*📅/g, function(match, group1) {
-                var dayOfMonth = new Date(group1).getDate();
-                return `${group1} <span class="calendar-emoji">🗓️ <span class="day">${dayOfMonth}</span></span>`
-            }))
-        });
-
         // Finds all <ul>s nested inside other <ul>s, Wraps their parent <li>'s contents in a toggle link, Adds Bootstrap
         // collapse behavior and toggle icons.
-        // don't apply to index
-        if (document.title !== "index") {
+        // only apply to the diary page
+        if (document.title === "diary") {
             $('ul:not(.nav-list) li:not(.done0):not(.done1):not(.done2):not(.done3):not(.done4) ul').each(function (i) {
                 var $subList = $(this);
                 var $parentLi = $subList.closest('li');

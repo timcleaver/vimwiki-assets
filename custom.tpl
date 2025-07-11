@@ -128,6 +128,69 @@
   </div>
 </footer>
 <script>
+    function convertAsciiArrowsToUnicode(text) {
+      const replacements = [
+        // Longest patterns first
+        [/<==>/g, '⟺'],
+        [/<--->/g, '⟷'],
+        [/<==/g, '⟸'],
+        [/==>/g, '⟹'],
+        [/<=>/g, '⇔'],
+        // don't render in vim and may not in browsers
+        //[/<--</g, '⭠'],
+        //[/>-->/g, '⭢'],
+        //[/<--|/g, '⭀'],
+        //[/\|-->/g, '⭁'],
+        //[/<~~/g, '⬳'],
+        //[/~~>/g, '⬲'],
+        //[/\|<--/g, '⭄'],
+        //[/-->\|/g, '⭃'],
+
+        // Medium patterns
+        [/<-</g, '↢'],
+        [/>->/g, '↣'],
+        [/<-\|/g, '↤'],
+        [/\|->/g, '↦'],
+        [/<~/g, '↜'],
+        [/~>/g, '↝'],
+        [/\|<-/g, '⇤'],
+        [/->\|/g, '⇥'],
+        [/<->/g, '↔'],
+        [/<=>/g, '⇔'],
+        [/->>/g, '↠'],
+        [/<<-/g, '↞'],
+
+        // Basics
+        [/<--/g, '⟵'],
+        [/-->/g, '⟶'],
+        [/<-/g, '←'],
+        [/->/g, '→'],
+        [/<=/g, '⇐'],
+        [/=>/g, '⇒'],
+      ];
+
+      for (const [pattern, replacement] of replacements) {
+        text = text.replace(pattern, replacement);
+      }
+
+      return text;
+    }
+
+    function walkAndReplace(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        node.textContent = convertAsciiArrowsToUnicode(node.textContent);
+      } else if (node.nodeType === Node.ELEMENT_NODE && !['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(node.tagName)) {
+        for (const child of node.childNodes) {
+          walkAndReplace(child);
+        }
+      }
+    }
+
+    // Run after DOM is loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      walkAndReplace(document.body);
+    });
+
     $(document).ready(function() {
         $('[id]').each(function () {
             const oldId = this.id;
@@ -389,6 +452,77 @@
         if (savedTheme === 'dark') {
             toggleTheme();
         }
+    });
+
+    // add previous and next links based on diary.html
+    $(function () {
+      const indexUrl = '/diary/diary.html';
+      const currentPage = location.pathname.split('/').pop();
+
+      // Regex to match 4 digits - 2 digits - 2 digits + ".html"
+      if (!/^\d{4}-\d{2}-\d{2}\.html$/.test(currentPage)) {
+        return; // Not a diary entry page, exit early
+      }
+
+      $.get(indexUrl, function (data) {
+        const $html = $('<div>').html(data);
+
+        // Get all day entry <a> elements from the index
+        const $links = $html.find('#content a[href$=".html"]').filter(function () {
+          return !this.href.includes('#');
+        });
+
+        const hrefs = $links.map((i, a) => $(a).attr('href')).get();
+        const index = hrefs.indexOf(currentPage);
+
+        if (index === -1) return;
+
+        const prevHref = hrefs[index + 1] || null;
+        const nextHref = hrefs[index - 1] || null;
+        const lastHref = hrefs[0] !== currentPage ? hrefs[0] : null;
+        const firstHref = hrefs[hrefs.length - 1] !== currentPage ? hrefs[hrefs.length - 1] : null;
+
+        const $nav = $('<div class="diary-nav" style="margin: 2em 0; display: flex; justify-content: space-between; font-size: 1.2em;"></div>');
+
+        const $left = $('<div class="nav-left"></div>');
+        const $right = $('<div class="nav-right"></div>');
+
+        if (firstHref) $left.append(`<a href="${firstHref}" title="First Entry">⏮️ First (${firstHref.replace('.html', '')})</a> `);
+        if (prevHref)  $left.append(`<a href="${prevHref}" title="Previous Entry">⬅️ Previous (${prevHref.replace('.html', '')})</a>`);
+
+        if (nextHref)  $right.append(`<a href="${nextHref}" title="Next Entry">Next (${nextHref.replace('.html', '')}) ➡️</a> `);
+        if (lastHref)  $right.append(`<a href="${lastHref}" title="Last Entry">Last (${lastHref.replace('.html', '')}) ⏭️</a>`);
+
+        $nav.append($left).append($right);
+
+        $('#content').prepend($nav.clone(true));
+        $('#content').append($nav.clone(true));
+
+        // Optional: Keyboard shortcuts
+        $(document).on('keydown', function (e) {
+          if ($(e.target).is('input, textarea')) return;
+
+          // Left arrow (←)
+          if (e.key === 'ArrowLeft' && prevHref) {
+            window.location.href = prevHref;
+          }
+
+          // Right arrow (→)
+          if (e.key === 'ArrowRight' && nextHref) {
+            window.location.href = nextHref;
+          }
+
+          // Home key (⤒)
+          if (e.key === 'Home' && firstHref) {
+            window.location.href = firstHref;
+          }
+
+          // End key (⤓)
+          if (e.key === 'End' && lastHref) {
+            window.location.href = lastHref;
+          }
+        });
+      });
     });
 
     $('pre').each(function() {

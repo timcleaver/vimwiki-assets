@@ -525,6 +525,24 @@
       });
     });
 
+    // add (count) of 5 to make the day score easier to read
+    $('p').each(function () {
+        const text = $(this).text().trim();
+        if (text.endsWith('out of 5 ⭐') && text.includes('★')) {
+          let count = 0;
+
+          $(this).contents().each(function () {
+            if (this.nodeType === Node.TEXT_NODE) {
+              const stars = this.nodeValue.match(/★/g);
+              if (stars) count += stars.length;
+            }
+          });
+
+          const html = $(this).html().replace(/out of 5/, `(${count}) out of 5`);
+          $(this).html(html);
+        }
+    });
+
     $('pre').each(function() {
         $(this).html('<code>'+$(this).html()+'</code>');
     });

@@ -892,9 +892,10 @@ form.bs-docs-example {
   width: 228px;
   margin: 30px 0 0;
   padding: 0;
-  -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  border-radius: 6px;
+}
+
+.bs-docs-sidenav > li {
+  padding-top: 0;
 }
 
 .bs-docs-sidenav > li > a {
@@ -947,6 +948,16 @@ form.bs-docs-example {
   top: 40px;
   bottom: 40px;
   overflow: hidden auto;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.bs-docs-sidenav.affix.has-top-border {
+  border-top-color: #e5e5e5;
+}
+
+.bs-docs-sidenav.affix.has-bottom-border {
+  border-bottom-color: #e5e5e5;
 }
 
 .bs-docs-sidenav.affix-bottom {

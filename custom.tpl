@@ -248,7 +248,10 @@
             $('#sidebar_list').on('click', '.toggle-submenu', function(e) {
                 e.preventDefault();
                 const $submenu = $(this).siblings('.submenu');
-                $submenu.slideToggle(200);
+                $submenu.slideToggle(200, function () {
+                  // Callback runs after slideToggle animation finishes
+                  updateBorders();
+                });
                 const $icon = $(this).find('i');
                 $icon.toggleClass('fa-chevron-right fa-chevron-down');
             });
@@ -257,12 +260,7 @@
             $('a').filter(function() {
                 return /([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/u.test($(this).text());
             }).each(function() {
-                console.log($(this).text());
-                console.log($(this).html())
                 $(this).html($(this).html().replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/ug, function(match, group1) {
-                    console.log($(this).text());
-                    console.log(match);
-                    console.log(group1);
                     var dayOfMonth = new Date(group1).getDate();
                     return `${group1} <span class="calendar-emoji">🗓️ <span class="day">${dayOfMonth}</span></span>`
                 }))
@@ -431,6 +429,28 @@
                 $(this).before('<hr class="year-separator">');
             }
         });
+
+        const $sidebar = $('.bs-docs-sidenav.affix');
+
+        function updateBorders() {
+            const scrollTop = $sidebar.scrollTop();
+            const scrollHeight = $sidebar[0].scrollHeight;
+            const clientHeight = $sidebar.innerHeight();
+
+            const atTop = scrollTop === 0;
+            const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+            // Toggle the border classes based on whether we're at the top or bottom of the sidebar ()
+            $sidebar.toggleClass('has-top-border', !atTop);
+            $sidebar.toggleClass('has-bottom-border', !atBottom);
+        }
+
+        // Initial check
+        updateBorders();
+
+        // Update on scroll and resize
+        $sidebar.on('scroll', updateBorders);
+        $(window).on('resize', updateBorders);
     });
 
     function toggleTheme() {

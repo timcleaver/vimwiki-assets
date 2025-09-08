@@ -39,6 +39,54 @@
         border-radius: 8px; /* Optional: rounded corners */
         position: relative;
     }
+
+    /* Robust tree styling: no glyphs, just borders */
+.tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  line-height: 1.5;
+}
+.tree ul {                 /* draw the vertical trunk for each nested level */
+  margin: 0;
+  padding-left: 1.25em;    /* room for elbow + label */
+  list-style: none;
+  border-left: 1px solid #999;
+}
+.tree li {
+  position: relative;
+  margin: 0;
+  padding: .15em 0 .15em .85em; /* room so text never hits the elbow */
+}
+
+/* horizontal connector from trunk to the label */
+.tree li::before {
+  content: "";
+  position: absolute;
+  left: -1.25em;           /* start at the trunk */
+  top: calc(0.75em);       /* roughly midline of the row; tweak if your font size changes */
+  width: 1.25em;           /* length of the horizontal segment */
+  border-top: 1px solid #999;
+}
+
+/* hide the trunk below the last child’s elbow */
+.tree ul > li:last-child::after {
+  content: "";
+  position: absolute;
+  left: -1.25em;           /* exactly over the trunk */
+  top: calc(0.75em + 1px); /* start just under the elbow line */
+  bottom: -0.2em;          /* extend a bit past the item’s bottom */
+  width: 1px;
+  background: #fff;        /* match your page background */
+}
+
+/* Optional: tighter look on small fonts */
+@media (max-width: 600px) {
+  .tree ul { padding-left: 1.1em; }
+  .tree li { padding-left: .75em; }
+  .tree li::before { left: -1.1em; width: 1.1em; }
+  .tree ul > li:last-child::after { left: -1.1em; }
+}
 </style>
 
 
@@ -46,7 +94,10 @@
 <script type="text/javascript" src="%root_path%assets/js/jquery-migrate-3.4.1.min.js"></script>
 
 <script type="text/javascript" src="%root_path%assets/js/bootstrap-2.3.0.js"></script>
+<script type="text/javascript" src="%root_path%assets/js/mermaid-11.9.0.min.js"></script>
 <script type="text/javascript" src="%root_path%assets/js/highlight.pack.js"></script>
+<script type="text/javascript" src="%root_path%assets/js/d3.v7.min.js"></script>
+<script type="text/javascript" src="%root_path%assets/js/d3.layout.cloud.js"></script>
 
 <title>%title%</title>
 
@@ -84,7 +135,10 @@
                         <a href="%root_path%diary/diary.html">Diary</a>
                     </li>
                     <li class="">
-                        <a href="%root_path%flight_centre.glossary.html">Flight Centre Glossary</a>
+                        <a href="%root_path%tags.html">Tags</a>
+                    </li>
+                    <li class="">
+                        <a href="%root_path%flightcentre/index.html">Flight Centre</a>
                     </li>
                     <!--
                     <li class="">
@@ -543,10 +597,9 @@
           }
         });
       });
-    });
 
-    // add (count) of 5 to make the day score easier to read
-    $('p').each(function () {
+      // add (count) of 5 to make the day score easier to read
+      $('p').each(function () {
         const text = $(this).text().trim();
         if (text.endsWith('out of 5 ⭐') && text.includes('★')) {
           let count = 0;
@@ -561,12 +614,122 @@
           const html = $(this).html().replace(/out of 5/, `(${count}) out of 5`);
           $(this).html(html);
         }
+      });
     });
 
-    $('pre').each(function() {
+    $("p").each(function() {
+      var text = $(this).html().trim();
+
+      // Only handle paragraphs that contain tree characters
+      if (!/[├└│]/.test(text)) {
+        return;
+      }
+
+      var lines = text.split(/<br\s*\/?>|\n/);
+
+      // Root UL
+      var $root = $("<ul class='tree'></ul>");
+      var stack = [ {depth: 0, ul: $root} ];
+
+      $.each(lines, function(_, line) {
+        if (!line.trim()) return;
+
+        // Count indentation level (each "│   " or 4 spaces = one level)
+        var match = line.match(/^([│\s]+)/);
+        var indent = match ? match[0] : "";
+        var depth = Math.floor(indent.replace(/│/g, "    ").length / 4);
+
+        // Strip leading tree characters
+        line = line.replace(/&nbsp;/g, " ");
+        var clean = line.replace(/^[\s\u00A0\u2500-\u257F]+/g, "");
+
+        // Ensure stack has correct depth
+        while (stack.length > depth + 1) stack.pop();
+        if (stack.length < depth + 1) {
+          // Create intermediate ULs if missing
+          var parent = stack[stack.length-1].ul;
+          var $newul = $("<ul></ul>");
+          parent.children("li").last().append($newul);
+          stack.push({depth: depth, ul: $newul});
+        }
+
+        // Add LI to current depth UL
+        stack[stack.length-1].ul.append($("<li></li>").html(clean));
+      });
+      $(this).replaceWith($root);
+    });
+
+    if (document.title === 'tags') {
+      // Create the tag cloud container
+      var $cloudDiv = $('<div id="tag-cloud-container" style="width: 800px; height: 400px;"></div>');
+
+      // Insert it after the #tags element, inside #content
+      $('#content div#Tags').after($cloudDiv);
+
+      // 1. Extract tags and counts from the HTML
+      var tags = [];
+      $("div[id^='Tags-']").each(function() {
+          var $div = $(this);
+          var tagName = $div.find("h2 a").text();
+          var count = $div.next("ul").find("li").length;
+          tags.push({ text: tagName, size: count });
+      });
+
+      // 2. Scale font sizes
+      var counts = tags.map(function(t) { return t.size; });
+      var minCount = Math.min.apply(null, counts);
+      var maxCount = Math.max.apply(null, counts);
+      var minFont = 15, maxFont = 80;
+
+      $.each(tags, function(i, tag) {
+        tag.size = minFont + (tag.size - minCount) / (maxCount - minCount || 1) * (maxFont - minFont);
+      });
+
+      // 3. Setup the cloud layout
+      var layout = d3.layout.cloud()
+        .size([800, 400])
+        .words(tags)
+        .padding(5)
+        .rotate(function() { return Math.random() < 0.5 ? 0 : 90; })
+        .font("Impact")
+        .fontSize(function(d) { return d.size; })
+        .on("end", draw);
+
+      layout.start();
+
+      // 4. Draw function
+      function draw(words) {
+        var svg = d3.select("#tag-cloud-container").append("svg")
+          .attr("width", layout.size()[0])
+          .attr("height", layout.size()[1]);
+
+        var g = svg.append("g")
+          .attr("transform", "translate(" + layout.size()[0]/2 + "," + layout.size()[1]/2 + ")");
+
+        g.selectAll("text")
+          .data(words)
+          .enter()
+          .append("a") // append an anchor
+          .attr("xlink:href", d => "#tags-" + d.text)
+          .append("text")
+          .style("font-size", function(d){ return d.size + "px"; })
+          .style("font-family", "Impact")
+          .style("fill", function(){ return d3.schemeCategory10[Math.floor(Math.random()*10)]; })
+          .attr("text-anchor", "middle")
+          .attr("transform", function(d){ return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+          .text(function(d){ return d.text; })
+          .style("cursor", "pointer")
+          .on("click", function(event, d){
+            window.location.href = "#tags-" + d.text;
+          });
+       }
+    }
+
+    $('pre code:not(.mermaid)').each(function() {
         $(this).html('<code>'+$(this).html()+'</code>');
     });
     hljs.initHighlightingOnLoad();
+    mermaid.initialize({ startOnLoad: true });
 </script>
 </body>
 </html>

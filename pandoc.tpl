@@ -31,32 +31,32 @@
       id="theme-stylesheet"
       type="text/css"
       rel="stylesheet"
-      href="./assets/css/bootstrap.css"
+      href="/assets/css/bootstrap.css"
     />
 
     <link
       type="text/css"
       rel="stylesheet"
-      href="./assets/css/bootstrap-responsive.css"
+      href="/assets/css/bootstrap-responsive.css"
     />
-    <link type="text/css" rel="stylesheet" href="./assets/css/docs.css" />
-    <link type="text/css" rel="stylesheet" href="./assets/css/monokai.css" />
-    <link type="text/css" rel="stylesheet" href="./assets/css/vimwiki.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/docs.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/monokai.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/vimwiki.css" />
     <link
       type="text/css"
       rel="stylesheet"
-      href="./assets/css/font-awesome.css"
+      href="/assets/css/font-awesome.css"
     />
 
-    <script type="text/javascript" src="./assets/js/jquery-3.7.1.min.js"></script>
-    <script type="text/javascript" src="./assets/js/jquery-migrate-3.4.1.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery-migrate-3.4.1.min.js"></script>
 
 
     <script
       type="text/javascript"
-      src="./assets/js/bootstrap-2.3.0.js"
+      src="/assets/js/bootstrap-2.3.0.js"
     ></script>
-    <script type="text/javascript" src="./assets/js/highlight.pack.js"></script>
+    <script type="text/javascript" src="/assets/js/highlight.pack.js"></script>
 
     $for(header-includes)$ $header-includes$ $endfor$ $if(math)$ $math$ $endif$
   </head>
@@ -97,21 +97,25 @@
             <!-- .nav, .navbar-search, .navbar-form, etc -->
             <ul class="nav">
               <li class="">
-                <a href="./index.html">Index</a>
+                <a href="/index.html">Index</a>
               </li>
               <li class="">
-                <a href="./README.html">Read Me</a>
+                <a href="/README.html">Read Me</a>
               </li>
               <!-- ><li class="">
                         <a href="./workspace/index.html">Workspace</a>
                     </li>
                     -->
               <li class="">
-                <a href="./diary/diary.html">Diary</a>
+                <a href="/diary/diary.html">Diary</a>
               </li>
               <li class="">
-                <a href="./flight_centre.glossary.html"
-                  >Flight Centre Glossary</a
+                <a href="/tags.html">Tags</a>
+              </li>
+              </li>
+              <li class="">
+                <a href="/flightcentre/index.html"
+                  >Flight Centre</a
                 >
               </li>
               <!--
@@ -119,7 +123,7 @@
                         <a href="#">Calendar</a>
                     </li>
                     <li class="">
-                        <a href="./todo.html">To Do</a>
+                        <a href="/todo.html">To Do</a>
                     </li>
                     -->
             </ul>

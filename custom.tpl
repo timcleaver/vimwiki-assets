@@ -138,7 +138,7 @@
                         <a href="%root_path%tags.html">Tags</a>
                     </li>
                     <li class="">
-                        <a href="%root_path%flightcentre/index.html">Flight Centre</a>
+                        <a href="%root_path%flightcentre/flightcentre-index.html">Flight Centre</a>
                     </li>
                     <!--
                     <li class="">

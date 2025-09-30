@@ -132,7 +132,7 @@
 <script type="text/javascript" src="%root_path%assets/js/jquery-migrate-3.4.1.min.js"></script>
 
 <script type="text/javascript" src="%root_path%assets/js/bootstrap-2.3.0.js"></script>
-<script type="text/javascript" src="%root_path%assets/js/mermaid-11.9.0.min.js"></script>
+<script type="text/javascript" src="%root_path%assets/js/mermaid-11.12.0.min.js"></script>
 <script type="text/javascript" src="%root_path%assets/js/highlight.pack.js"></script>
 <script type="text/javascript" src="%root_path%assets/js/d3.v7.min.js"></script>
 <script type="text/javascript" src="%root_path%assets/js/d3.layout.cloud.js"></script>

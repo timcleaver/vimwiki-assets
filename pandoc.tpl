@@ -119,7 +119,7 @@
                 >
               </li>
               <li class="">
-                  <a href="/feed.rss"><img src="/images/feed-icon.svg" alt="Feed Icon" width="16px"
+                  <a href="/feed.rss"><img src="/assets/img/feed-icon.svg" alt="Feed Icon" width="16px"
                             height="16px"/>&nbsp;Feed</a>
               </li>
               <!--

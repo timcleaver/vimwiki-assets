@@ -179,7 +179,7 @@
                         <a href="%root_path%flightcentre/flightcentre-index.html">Flight Centre</a>
                     </li>
                     <li class="">
-                        <a href="%root_path%feed.rss"><img src="/images/feed-icon.svg" alt="Feed Icon" width="16px"
+                        <a href="%root_path%feed.rss"><img src="/assets/img/feed-icon.svg" alt="Feed Icon" width="16px"
                             height="16px"/>&nbsp;Feed</a>
                     </li>
                     <!--

@@ -87,6 +87,44 @@
   .tree li::before { left: -1.1em; width: 1.1em; }
   .tree ul > li:last-child::after { left: -1.1em; }
 }
+
+/* Mermaid diagram styling fixes */
+.mermaid {
+    text-align: center;
+    margin: 1em 0;
+}
+
+/* Ensure Mermaid SVG arrowheads are visible */
+.mermaid svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Fix for arrowhead markers that might be hidden */
+.mermaid svg defs marker {
+    overflow: visible !important;
+}
+
+.mermaid svg .edgePath marker {
+    overflow: visible !important;
+}
+
+/* Ensure flowchart arrows are properly styled */
+.mermaid .edgePath .path {
+    stroke: #333 !important;
+    stroke-width: 1.5px !important;
+    fill: none !important;
+}
+
+.mermaid .marker {
+    fill: #333 !important;
+    stroke: #333 !important;
+}
+
+/* Fix for potential Bootstrap CSS conflicts */
+.mermaid * {
+    box-sizing: content-box;
+}
 </style>
 
 
@@ -139,6 +177,10 @@
                     </li>
                     <li class="">
                         <a href="%root_path%flightcentre/flightcentre-index.html">Flight Centre</a>
+                    </li>
+                    <li class="">
+                        <a href="%root_path%feed.rss"><img src="/images/feed-icon.svg" alt="Feed Icon" width="16px"
+                            height="16px"/>&nbsp;Feed</a>
                     </li>
                     <!--
                     <li class="">
@@ -234,15 +276,22 @@
       if (node.nodeType === Node.TEXT_NODE) {
         node.textContent = convertAsciiArrowsToUnicode(node.textContent);
       } else if (node.nodeType === Node.ELEMENT_NODE && !['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(node.tagName)) {
+        // Skip mermaid elements to avoid breaking diagram syntax
+        if (node.classList && node.classList.contains('mermaid')) {
+          return;
+        }
         for (const child of node.childNodes) {
           walkAndReplace(child);
         }
       }
     }
 
-    // Run after DOM is loaded
+    // Run after DOM is loaded, but AFTER Mermaid has processed
     document.addEventListener("DOMContentLoaded", () => {
-      walkAndReplace(document.body);
+      // Wait for Mermaid to finish processing before converting arrows
+      setTimeout(() => {
+        walkAndReplace(document.body);
+      }, 100);
     });
 
     $(document).ready(function() {
@@ -729,7 +778,51 @@
         $(this).html('<code>'+$(this).html()+'</code>');
     });
     hljs.initHighlightingOnLoad();
-    mermaid.initialize({ startOnLoad: true });
+
+    // Initialize Mermaid with proper configuration
+    mermaid.initialize({
+        startOnLoad: false,  // Changed to false for manual control
+        theme: 'default',
+        themeVariables: {
+            primaryColor: '#fff',
+            primaryTextColor: '#333',
+            primaryBorderColor: '#333',
+            lineColor: '#333',
+            arrowheadColor: '#333'
+        },
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis'
+        },
+        sequence: {
+            diagramMarginX: 50,
+            diagramMarginY: 10,
+            actorMargin: 50,
+            width: 150,
+            height: 65,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35,
+            mirrorActors: true,
+            bottomMarginAdj: 1,
+            useMaxWidth: true
+        }
+    });
+
+    // Manually process Mermaid diagrams on DOM ready
+    $(document).ready(function() {
+        // Process existing mermaid elements
+        $('.mermaid').each(function(index, element) {
+            try {
+                mermaid.init(undefined, element);
+            } catch (e) {
+                console.error('Mermaid rendering error:', e);
+                console.log('Element content:', element.textContent);
+            }
+        });
+    });
 </script>
 </body>
 </html>

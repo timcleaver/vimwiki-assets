@@ -280,6 +280,10 @@
         if (node.classList && node.classList.contains('mermaid')) {
           return;
         }
+        // Skip blockquote elements to avoid breaking quote formatting
+        if (node.tagName === 'BLOCKQUOTE') {
+          return;
+        }
         for (const child of node.childNodes) {
           walkAndReplace(child);
         }
@@ -485,7 +489,11 @@
         });
 
         <!-- use the taskwarrior ids to color their text -->
-        $("body").children().each(function() {
+        $("body").children().not('blockquote').each(function() {
+            // Skip blockquotes to avoid breaking quote formatting
+            if ($(this).is('blockquote') || $(this).find('blockquote').length > 0) {
+                return;
+            }
             $(this).html($(this).html().replace(/ \| project:\s*\w+/g, "").replace(/(#[a-f0-9]{6})[a-f0-9]{2}/g, function(match, group1) {
                 return '<span style="color: ' + group1 + '">' + group1 + "</span>";
             }))
@@ -554,6 +562,23 @@
         // Update on scroll and resize
         $sidebar.on('scroll', updateBorders);
         $(window).on('resize', updateBorders);
+
+        // Simple fix: just clean up &gt; in paragraphs that start with it
+        $('p').each(function() {
+            var $p = $(this);
+            var html = $p.html();
+
+            // If paragraph starts with &gt; or > (with possible whitespace), clean it up
+            if (html.trim().match(/^\s*&gt;/) || html.trim().match(/^\s*>/)) {
+                var cleaned = html.replace(/^\s*&gt;\s*/, '').replace(/^\s*>\s*/, '').trim();
+                $p.html(cleaned);
+
+                // Convert this paragraph to a blockquote if it's not already inside one
+                if (!$p.closest('blockquote').length) {
+                    $p.wrap('<blockquote></blockquote>');
+                }
+            }
+        });
     });
 
     function toggleTheme() {

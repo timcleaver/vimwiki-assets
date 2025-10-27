@@ -615,9 +615,11 @@
       $.get(indexUrl, function (data) {
         const $html = $('<div>').html(data);
 
-        // Get all day entry <a> elements from the index
+        // Get all day entry <a> elements from the index, excluding monthly summaries
         const $links = $html.find('#content a[href$=".html"]').filter(function () {
-          return !this.href.includes('#');
+          const href = $(this).attr('href');
+          // Exclude links with # and only include daily entries (YYYY-MM-DD.html)
+          return !href.includes('#') && /^\d{4}-\d{2}-\d{2}\.html$/.test(href);
         });
 
         const hrefs = $links.map((i, a) => $(a).attr('href')).get();

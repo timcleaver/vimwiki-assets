@@ -579,6 +579,13 @@
                 }
             }
         });
+
+        // Link tag spans to their section in tags.html
+        var tagsHref = $('a[href$="tags.html"]').first().attr('href') || '%root_path%tags.html';
+        $('span.tag').each(function() {
+            var tagName = $(this).text();
+            $(this).html('<a href="' + tagsHref + '#Tags-' + tagName + '">' + tagName + '</a>');
+        });
     });
 
     function toggleTheme() {

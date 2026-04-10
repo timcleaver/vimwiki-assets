@@ -749,6 +749,32 @@
       // Insert it after the #tags element, inside #content
       $('#content div#Tags').after($cloudDiv);
 
+      // Alphabetical index bar
+      var $indexBar = $('<div id="tag-alpha-index" style="margin: 0.5em 0 2em; text-align: center; font-size: 1.1em; line-height: 2;"></div>');
+      $cloudDiv.after($indexBar);
+
+      var letterMap = {};
+      $("div[id^='Tags-']").each(function() {
+          var tagName = $(this).find("h2 a").text().trim().toLowerCase();
+          if (!tagName) return;
+          var firstChar = tagName.charAt(0);
+          var bucket = /[0-9]/.test(firstChar) ? '#' : firstChar.toUpperCase();
+          if (!letterMap[bucket]) {
+              letterMap[bucket] = '#tags-' + tagName;
+          }
+      });
+
+      var buckets = Object.keys(letterMap).sort(function(a, b) {
+          if (a === '#') return -1;
+          if (b === '#') return 1;
+          return a.localeCompare(b);
+      });
+
+      var indexLinks = buckets.map(function(b) {
+          return '<a href="' + letterMap[b] + '" style="margin: 0 0.4em; font-weight: bold;">' + b + '</a>';
+      });
+      $indexBar.html(indexLinks.join(''));
+
       // 1. Extract tags and counts from the HTML
       var tags = [];
       $("div[id^='Tags-']").each(function() {

@@ -125,6 +125,12 @@
 .mermaid * {
     box-sizing: content-box;
 }
+
+/* Tags page: diary entries under each tag in 5 columns */
+div[id^='tags-'] + ul {
+    column-count: 5;
+    column-gap: 1em;
+}
 </style>
 
 
@@ -750,7 +756,7 @@
       $('#content div#Tags').after($cloudDiv);
 
       // Alphabetical index bar
-      var $indexBar = $('<div id="tag-alpha-index" style="margin: 0.5em 0 2em; text-align: center; font-size: 1.1em; line-height: 2;"></div>');
+      var $indexBar = $('<div id="tag-alpha-index" class="well well-small" style="margin: 0.5em 0 2em; text-align: center; font-size: 1.1em; line-height: 2;"></div>');
       $cloudDiv.after($indexBar);
 
       var letterMap = {};

@@ -13,6 +13,10 @@
 <link type="text/css" rel="stylesheet" href="%root_path%assets/css/font-awesome.css">
 
 <style>
+    :root {
+        color-scheme: light dark;
+    }
+
     .day {
         position: absolute;
         top: 0.5em;
@@ -594,24 +598,124 @@ div[id^='tags-'] + ul {
         });
     });
 
-    function toggleTheme() {
-        const themeLink = document.getElementById("theme-stylesheet");
-        if (themeLink.getAttribute("href") === "%root_path%assets/css/bootstrap.css") {
-            themeLink.setAttribute("href", "%root_path%assets/css/bootstrap-dark.css");
-            document.getElementById('themeToggle').textContent = '☀️';
-            localStorage.setItem('theme', 'dark');
+    const THEME_STORAGE_KEY = 'theme';
+    const THEME_LIGHT = 'light';
+    const THEME_DARK = 'dark';
+    const THEME_AUTO = 'auto';
+    const THEME_LIGHT_HREF = '%root_path%assets/css/bootstrap.css';
+    const THEME_DARK_HREF = '%root_path%assets/css/bootstrap-dark.css';
+    const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function readCookie(name) {
+        const cookiePairs = document.cookie ? document.cookie.split('; ') : [];
+        for (let i = 0; i < cookiePairs.length; i += 1) {
+            const parts = cookiePairs[i].split('=');
+            const key = parts.shift();
+            if (key === name) {
+                return decodeURIComponent(parts.join('='));
+            }
+        }
+        return null;
+    }
+
+    function writeCookie(name, value) {
+        document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+
+    function getStoredThemePreference() {
+        let localValue = null;
+        try {
+            localValue = localStorage.getItem(THEME_STORAGE_KEY);
+        } catch (error) {
+            localValue = null;
+        }
+
+        const cookieValue = readCookie(THEME_STORAGE_KEY);
+        return normalizeThemePreference(localValue || cookieValue);
+    }
+
+    function persistThemePreference(themePreference) {
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+        } catch (error) {
+            // localStorage may be unavailable in some browsing contexts.
+        }
+        writeCookie(THEME_STORAGE_KEY, themePreference);
+    }
+
+    function normalizeThemePreference(value) {
+        if (value === THEME_LIGHT || value === THEME_DARK || value === THEME_AUTO) {
+            return value;
+        }
+        return THEME_AUTO;
+    }
+
+    function getEffectiveTheme(themePreference) {
+        if (themePreference === THEME_AUTO) {
+            return systemThemeMedia.matches ? THEME_DARK : THEME_LIGHT;
+        }
+        return themePreference;
+    }
+
+    function applyTheme(themePreference) {
+        const themeLink = document.getElementById('theme-stylesheet');
+        const themeToggle = document.getElementById('themeToggle');
+        const effectiveTheme = getEffectiveTheme(themePreference);
+
+        themeLink.setAttribute('href', effectiveTheme === THEME_DARK ? THEME_DARK_HREF : THEME_LIGHT_HREF);
+        document.documentElement.style.colorScheme = effectiveTheme;
+
+        if (themePreference === THEME_AUTO) {
+            themeToggle.textContent = '🌓';
+            themeToggle.title = 'Theme: Auto (follows system)';
+        } else if (effectiveTheme === THEME_DARK) {
+            themeToggle.textContent = '☀️';
+            themeToggle.title = 'Theme: Dark';
         } else {
-            themeLink.setAttribute("href", "%root_path%assets/css/bootstrap.css");
-            document.getElementById('themeToggle').textContent = '🌙';
-            localStorage.setItem('theme', 'light');
+            themeToggle.textContent = '🌙';
+            themeToggle.title = 'Theme: Light';
         }
     }
 
-    // Apply saved theme on load
+    function getNextThemePreference(currentPreference) {
+        if (currentPreference === THEME_AUTO) {
+            return THEME_DARK;
+        }
+        if (currentPreference === THEME_DARK) {
+            return THEME_LIGHT;
+        }
+        return THEME_AUTO;
+    }
+
+    function toggleTheme() {
+        const currentPreference = getStoredThemePreference();
+        const nextPreference = getNextThemePreference(currentPreference);
+        persistThemePreference(nextPreference);
+        applyTheme(nextPreference);
+    }
+
+    // Apply saved theme on load; default to auto following system preference.
     window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            toggleTheme();
+        const savedThemePreference = getStoredThemePreference();
+        applyTheme(savedThemePreference);
+
+        const onSystemThemeChange = () => {
+            const currentPreference = getStoredThemePreference();
+            if (currentPreference === THEME_AUTO) {
+                applyTheme(THEME_AUTO);
+            }
+        };
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === THEME_STORAGE_KEY) {
+                applyTheme(getStoredThemePreference());
+            }
+        });
+
+        if (typeof systemThemeMedia.addEventListener === 'function') {
+            systemThemeMedia.addEventListener('change', onSystemThemeChange);
+        } else if (typeof systemThemeMedia.addListener === 'function') {
+            systemThemeMedia.addListener(onSystemThemeChange);
         }
     });
 

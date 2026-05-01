@@ -31,21 +31,21 @@
       id="theme-stylesheet"
       type="text/css"
       rel="stylesheet"
-      href="/assets/css/bootstrap.css"
+      href="$if(site_root)$$site_root$$endif$/assets/css/bootstrap.css"
     />
 
     <link
       type="text/css"
       rel="stylesheet"
-      href="/assets/css/bootstrap-responsive.css"
+      href="$if(site_root)$$site_root$$endif$/assets/css/bootstrap-responsive.css"
     />
-    <link type="text/css" rel="stylesheet" href="/assets/css/docs.css" />
-    <link type="text/css" rel="stylesheet" href="/assets/css/monokai.css" />
-    <link type="text/css" rel="stylesheet" href="/assets/css/vimwiki.css" />
+    <link type="text/css" rel="stylesheet" href="$if(site_root)$$site_root$$endif$/assets/css/docs.css" />
+    <link type="text/css" rel="stylesheet" href="$if(site_root)$$site_root$$endif$/assets/css/monokai.css" />
+    <link type="text/css" rel="stylesheet" href="$if(site_root)$$site_root$$endif$/assets/css/vimwiki.css" />
     <link
       type="text/css"
       rel="stylesheet"
-      href="/assets/css/font-awesome.css"
+      href="$if(site_root)$$site_root$$endif$/assets/css/font-awesome.css"
     />
 
     <style>
@@ -54,15 +54,15 @@
       }
     </style>
 
-    <script type="text/javascript" src="/assets/js/jquery-3.7.1.min.js"></script>
-    <script type="text/javascript" src="/assets/js/jquery-migrate-3.4.1.min.js"></script>
+    <script type="text/javascript" src="$if(site_root)$$site_root$$endif$/assets/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="$if(site_root)$$site_root$$endif$/assets/js/jquery-migrate-3.4.1.min.js"></script>
 
 
     <script
       type="text/javascript"
-      src="/assets/js/bootstrap-2.3.0.js"
+      src="$if(site_root)$$site_root$$endif$/assets/js/bootstrap-2.3.0.js"
     ></script>
-    <script type="text/javascript" src="/assets/js/highlight.pack.js"></script>
+    <script type="text/javascript" src="$if(site_root)$$site_root$$endif$/assets/js/highlight.pack.js"></script>
 
     $for(header-includes)$ $header-includes$ $endfor$ $if(math)$ $math$ $endif$
   </head>
@@ -103,29 +103,28 @@
             <!-- .nav, .navbar-search, .navbar-form, etc -->
             <ul class="nav">
               <li class="">
-                <a href="/index.html">Index</a>
+                <a href="$if(site_root)$$site_root$$endif$/index.html">Index</a>
               </li>
               <li class="">
-                <a href="/README.html">Read Me</a>
+                <a href="$if(site_root)$$site_root$$endif$/README.html">Read Me</a>
               </li>
               <!-- ><li class="">
                         <a href="./workspace/index.html">Workspace</a>
                     </li>
                     -->
               <li class="">
-                <a href="/diary/diary.html">Diary</a>
+                <a href="$if(site_root)$$site_root$$endif$/diary/diary.html">Diary</a>
               </li>
               <li class="">
-                <a href="/tags.html">Tags</a>
-              </li>
+                <a href="$if(site_root)$$site_root$$endif$/tags.html">Tags</a>
               </li>
               <li class="">
-                <a href="/flightcentre/flightcentre-index.html"
+                <a href="$if(site_root)$$site_root$$endif$/flightcentre/flightcentre-index.html"
                   >Flight Centre</a
                 >
               </li>
               <li class="">
-                  <a href="/feed.rss"><img src="/assets/img/feed-icon.svg" alt="Feed Icon" width="16px"
+                  <a href="$if(site_root)$$site_root$$endif$/feed.rss"><img src="$if(site_root)$$site_root$$endif$/assets/img/feed-icon.svg" alt="Feed Icon" width="16px"
                             height="16px"/>&nbsp;Feed</a>
               </li>
               <!--
@@ -133,7 +132,7 @@
                         <a href="#">Calendar</a>
                     </li>
                     <li class="">
-                        <a href="/todo.html">To Do</a>
+                      <a href="$if(site_root)$$site_root$$endif$/todo.html">To Do</a>
                     </li>
                     -->
             </ul>
@@ -188,8 +187,8 @@
       const THEME_LIGHT = "light";
       const THEME_DARK = "dark";
       const THEME_AUTO = "auto";
-      const THEME_LIGHT_HREF = "/assets/css/bootstrap.css";
-      const THEME_DARK_HREF = "/assets/css/bootstrap-dark.css";
+      const THEME_LIGHT_HREF = "$if(site_root)$$site_root$$endif$/assets/css/bootstrap.css";
+      const THEME_DARK_HREF = "$if(site_root)$$site_root$$endif$/assets/css/bootstrap-dark.css";
       const systemThemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
 
       function readCookie(name) {

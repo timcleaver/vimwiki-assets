@@ -135,6 +135,137 @@ div[id^='tags-'] + ul {
     column-count: 5;
     column-gap: 1em;
 }
+
+/* Diary page: list/calendar toggle and calendar layout */
+.diary-view-toggle {
+    margin: 0.5em 0 1em;
+    padding: 0.45em 0.75em;
+    border: 1px solid #d0d0d0;
+    border-radius: 999px;
+    display: inline-flex;
+    gap: 0.75em;
+    align-items: center;
+}
+
+.diary-view-label {
+    font-weight: 600;
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
+}
+
+.diary-view-label.is-active {
+    opacity: 1;
+}
+
+.diary-switch {
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    border: 1px solid #b5b5b5;
+    background: #e7e7e7;
+    display: inline-flex;
+    align-items: center;
+    padding: 1px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.diary-switch:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.diary-switch-knob {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #c7c7c7;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    transform: translateX(0);
+    transition: transform 0.2s ease;
+}
+
+.diary-switch.is-calendar {
+    background: #4cd964;
+    border-color: #3cb957;
+}
+
+.diary-switch.is-calendar .diary-switch-knob {
+    transform: translateX(20px);
+}
+
+#calendar-view-pane {
+    margin: 1em 0;
+}
+
+#content #calendar-view-pane {
+    display: none;
+}
+
+.diary-month {
+    margin: 0 0 1.5em;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.75em;
+}
+
+.diary-month-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 0 0 0.5em;
+}
+
+.diary-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25em;
+}
+
+.diary-weekday {
+    text-align: center;
+    font-weight: 600;
+    opacity: 0.8;
+    padding: 0.25em;
+    font-size: 0.9em;
+}
+
+.diary-day-cell {
+    min-height: 2.25em;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+}
+
+.diary-day-cell.empty {
+    border-color: transparent;
+}
+
+.diary-day-cell a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .diary-view-toggle {
+        width: auto;
+        justify-content: flex-start;
+    }
+
+    .diary-day-cell {
+        min-height: 2em;
+        font-size: 0.82em;
+    }
+}
 </style>
 
 
@@ -336,6 +467,148 @@ div[id^='tags-'] + ul {
             $('#content > ul').each(function() {
                 $(this).css({ 'column-count': 4 });
             });
+
+            const $content = $('#content');
+            const $calendarView = $('<div id="calendar-view-pane"></div>');
+            const $toggle = $(
+                '<div class="diary-view-toggle">' +
+                    '<span class="diary-view-label diary-view-label-list is-active">List</span>' +
+                    '<button type="button" class="diary-switch" role="switch" aria-label="Toggle diary view" aria-checked="false">' +
+                        '<span class="diary-switch-knob"></span>' +
+                    '</button>' +
+                    '<span class="diary-view-label diary-view-label-calendar">Calendar</span>' +
+                '</div>'
+            );
+
+            const $insertAfter = $content.children().first();
+            if ($insertAfter.length) {
+                $insertAfter.after($toggle, $calendarView);
+            } else {
+                $content.prepend($toggle, $calendarView);
+            }
+
+            const $listNodes = $calendarView.nextAll();
+
+            const entries = [];
+            $listNodes.find('a[href$=".html"]').each(function() {
+                const href = $(this).attr('href') || '';
+                const match = href.match(/^(\d{4})-(\d{2})-(\d{2})\.html$/);
+                if (!match) {
+                    return;
+                }
+
+                entries.push({
+                    href,
+                    year: parseInt(match[1], 10),
+                    month: parseInt(match[2], 10),
+                    day: parseInt(match[3], 10)
+                });
+            });
+
+            const monthMap = {};
+            entries.forEach(function(entry) {
+                const key = entry.year + '-' + String(entry.month).padStart(2, '0');
+                if (!monthMap[key]) {
+                    monthMap[key] = [];
+                }
+                monthMap[key].push(entry);
+            });
+
+            const monthKeys = Object.keys(monthMap).sort(function(a, b) {
+                const [aYear, aMonth] = a.split('-').map(function(part) { return parseInt(part, 10); });
+                const [bYear, bMonth] = b.split('-').map(function(part) { return parseInt(part, 10); });
+
+                if (aYear !== bYear) {
+                    return bYear - aYear;
+                }
+                return bMonth - aMonth;
+            });
+            const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            monthKeys.forEach(function(key) {
+                const parts = key.split('-');
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10);
+                const firstDay = new Date(year, month - 1, 1).getDay();
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const monthName = new Date(year, month - 1, 1).toLocaleString(undefined, { month: 'long' });
+                const dayLinkMap = {};
+
+                monthMap[key].forEach(function(entry) {
+                    dayLinkMap[entry.day] = entry.href;
+                });
+
+                const $month = $('<section class="diary-month"></section>');
+                $month.append('<h3 class="diary-month-title">' + monthName + ' ' + year + '</h3>');
+
+                const $grid = $('<div class="diary-month-grid"></div>');
+
+                weekdayNames.forEach(function(dayName) {
+                    $grid.append('<div class="diary-weekday">' + dayName + '</div>');
+                });
+
+                for (let i = 0; i < firstDay; i += 1) {
+                    $grid.append('<div class="diary-day-cell empty"></div>');
+                }
+
+                for (let day = 1; day <= daysInMonth; day += 1) {
+                    const href = dayLinkMap[day];
+                    if (href) {
+                        $grid.append('<div class="diary-day-cell"><a href="' + href + '">' + day + '</a></div>');
+                    } else {
+                        $grid.append('<div class="diary-day-cell">' + day + '</div>');
+                    }
+                }
+
+                $month.append($grid);
+                $calendarView.append($month);
+            });
+
+            let currentDiaryView = 'list';
+
+            function updateDiaryToggleUi(view, $activeToggle) {
+                const isCalendar = view === 'calendar';
+                $activeToggle.find('.diary-switch')
+                    .toggleClass('is-calendar', isCalendar)
+                    .attr('aria-checked', String(isCalendar));
+                $activeToggle.find('.diary-view-label-list').toggleClass('is-active', !isCalendar);
+                $activeToggle.find('.diary-view-label-calendar').toggleClass('is-active', isCalendar);
+            }
+
+            function setDiaryView(view) {
+                const $liveContent = $('#content');
+                const $liveCalendarView = $liveContent.find('#calendar-view-pane').first();
+                const $liveToggle = $liveContent.find('.diary-view-toggle').first();
+                const $liveListNodes = $liveCalendarView.nextAll();
+
+                if (!$liveCalendarView.length) {
+                    return;
+                }
+
+                currentDiaryView = view;
+                if (view === 'calendar') {
+                    $liveListNodes.hide();
+                    $liveCalendarView.show();
+                } else {
+                    $liveCalendarView.hide();
+                    $liveListNodes.show();
+                }
+
+                updateDiaryToggleUi(view, $liveToggle);
+            }
+
+            $(document).off('click.diaryViewToggle', '.diary-view-toggle .diary-switch').on('click.diaryViewToggle', '.diary-view-toggle .diary-switch', function() {
+                setDiaryView(currentDiaryView === 'list' ? 'calendar' : 'list');
+            });
+
+            $(document).off('keydown.diaryViewToggle', '.diary-view-toggle .diary-switch').on('keydown.diaryViewToggle', '.diary-view-toggle .diary-switch', function(event) {
+                if (event.key === ' ' || event.key === 'Enter') {
+                    event.preventDefault();
+                    setDiaryView(currentDiaryView === 'list' ? 'calendar' : 'list');
+                }
+            });
+
+            setDiaryView('list');
         } else {
             // hide empty h2s on non diary pages
             $('div > h2').each(function() {

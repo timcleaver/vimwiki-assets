@@ -255,6 +255,10 @@ div[id^='tags-'] + ul {
     font-weight: 600;
 }
 
+.diary-day-cell.has-stars {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
 @media (max-width: 700px) {
     .diary-view-toggle {
         width: auto;
@@ -597,6 +601,20 @@ div[id^='tags-'] + ul {
                 });
             }
 
+            function getDiaryStarColor(stars) {
+                if (typeof stars !== 'number' || !Number.isFinite(stars)) {
+                    return null;
+                }
+
+                const clamped = Math.max(0, Math.min(5, stars));
+                // 0 stars = red hue, 5 stars = green hue.
+                const hue = Math.round((clamped / 5) * 120);
+                return {
+                    background: 'hsl(' + hue + ', 75%, 88%)',
+                    border: 'hsl(' + hue + ', 55%, 72%)'
+                };
+            }
+
             function renderDiaryCalendar(rawEntries) {
                 const entries = normalizeDiaryEntries(rawEntries);
                 const monthMap = {};
@@ -660,7 +678,18 @@ div[id^='tags-'] + ul {
                     for (let day = 1; day <= daysInMonth; day += 1) {
                         const entry = dayLinkMap[day];
                         if (entry) {
-                            $grid.append('<div class="diary-day-cell"><a href="' + entry.href + '">' + decorateDiaryLinkLabel(entry.day, String(day)) + '</a></div>');
+                            const starColor = getDiaryStarColor(entry.stars);
+                            const $cell = $('<div class="diary-day-cell"></div>');
+                            if (starColor) {
+                                $cell
+                                    .addClass('has-stars')
+                                    .css({
+                                        'background-color': starColor.background,
+                                        'border-color': starColor.border
+                                    });
+                            }
+                            $cell.append('<a href="' + entry.href + '">' + decorateDiaryLinkLabel(entry.day, String(day)) + '</a>');
+                            $grid.append($cell);
                         } else {
                             $grid.append('<div class="diary-day-cell">' + day + '</div>');
                         }

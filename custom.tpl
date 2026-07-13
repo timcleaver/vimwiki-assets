@@ -462,13 +462,41 @@ div[id^='tags-'] + ul {
         $('h1').wrap('<div class="page-header" />');
         $('h1').wrap('<div class="well well-small" />');
 
+        // Default no-op; replaced with diary-aware decorator on the diary page.
+        let decorateDiaryLinkLabel = function(dayString, innerHtml) {
+            return innerHtml;
+        };
+
+        function applyDiaryDateEmojiDecorations() {
+            $('a').filter(function() {
+                return /([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/u.test($(this).text());
+            }).each(function() {
+                const $link = $(this);
+                if ($link.attr('data-diary-emoji-decorated') === '1') {
+                    return;
+                }
+
+                $link.html($link.html().replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/ug, function(match, group1) {
+                    var parts = group1.split('-').map(function(part) { return parseInt(part, 10); });
+                    var dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                    var dayOfMonth = dateObj.getDate();
+                    var innerHtml = `${group1} <span class="calendar-emoji">🗓️ <span class="day">${dayOfMonth}</span></span>`;
+
+                    return decorateDiaryLinkLabel(group1, innerHtml);
+                }));
+
+                $link.attr('data-diary-emoji-decorated', '1');
+            });
+        }
+
         // make the list of dates 4 columns wide
         if (document.title === "diary") {
             $('#content > ul').each(function() {
                 $(this).css({ 'column-count': 4 });
             });
 
-            const $content = $('#content');
+            const diaryJsonUrl = '%root_path%diary/diary.json';
+            const diaryEntryMetadata = {};
             const $calendarView = $('<div id="calendar-view-pane"></div>');
             const $toggle = $(
                 '<div class="diary-view-toggle">' +
@@ -480,89 +508,178 @@ div[id^='tags-'] + ul {
                 '</div>'
             );
 
-            const $insertAfter = $content.children().first();
-            if ($insertAfter.length) {
-                $insertAfter.after($toggle, $calendarView);
+            const $content = $('#content');
+            const $titleSection = $content.children('section').first();
+            const $titleHeader = $content.children('.page-header').first();
+            if ($titleSection.length) {
+                $titleSection.after($toggle, $calendarView);
+            } else if ($titleHeader.length) {
+                $titleHeader.after($toggle, $calendarView);
+            } else if ($content.children().first().length) {
+                $content.children().first().after($toggle, $calendarView);
             } else {
                 $content.prepend($toggle, $calendarView);
             }
+            const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-            const $listNodes = $calendarView.nextAll();
+            function getDiaryEdgeEmoji(status, isWeekend) {
+                if (status === 'sick') {
+                    return '🤮';
+                }
+                if (status === 'leave') {
+                    return '🥳';
+                }
+                if (isWeekend) {
+                    return '😡';
+                }
+                return '';
+            }
 
-            const entries = [];
-            $listNodes.find('a[href$=".html"]').each(function() {
-                const href = $(this).attr('href') || '';
-                const match = href.match(/^(\d{4})-(\d{2})-(\d{2})\.html$/);
-                if (!match) {
+            decorateDiaryLinkLabel = function(dayString, innerHtml) {
+                const metadata = diaryEntryMetadata[dayString] || {};
+                const parts = dayString.split('-').map(function(part) { return parseInt(part, 10); });
+                const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+                const edgeEmoji = getDiaryEdgeEmoji(metadata.status || null, isWeekend);
+
+                if (!edgeEmoji) {
+                    return innerHtml;
+                }
+
+                return edgeEmoji + ' ' + innerHtml + ' ' + edgeEmoji;
+            };
+
+            function getDiaryEntriesFromDom() {
+                const entries = [];
+                const $liveContent = $('#content');
+                let $candidateLinks = $liveContent.children('ul').find('a[href$=".html"]');
+                if ($candidateLinks.length === 0) {
+                    $candidateLinks = $liveContent.find('a[href$=".html"]');
+                }
+
+                $candidateLinks.each(function() {
+                    const href = $(this).attr('href') || '';
+                    const fileName = href.split('#')[0].split('?')[0].split('/').pop();
+                    const match = fileName ? fileName.match(/^(\d{4})-(\d{2})-(\d{2})\.html$/) : null;
+                    if (!match) {
+                        return;
+                    }
+
+                    entries.push({
+                        day: match[1] + '-' + match[2] + '-' + match[3],
+                        href,
+                        status: null,
+                        stars: null
+                    });
+                });
+                return entries;
+            }
+
+            function normalizeDiaryEntries(rawEntries) {
+                return (rawEntries || []).map(function(entry) {
+                    const dayValue = entry && entry.day ? String(entry.day) : '';
+                    const match = dayValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                    if (!match) {
+                        return null;
+                    }
+
+                    return {
+                        day: dayValue,
+                        href: (entry && entry.href) ? entry.href : dayValue + '.html',
+                        status: entry && entry.status ? String(entry.status).toLowerCase() : null,
+                        stars: entry && entry.stars != null ? Number(entry.stars) : null,
+                        year: parseInt(match[1], 10),
+                        month: parseInt(match[2], 10),
+                        date: parseInt(match[3], 10)
+                    };
+                }).filter(function(entry) {
+                    return entry !== null;
+                });
+            }
+
+            function renderDiaryCalendar(rawEntries) {
+                const entries = normalizeDiaryEntries(rawEntries);
+                const monthMap = {};
+                const $liveCalendarView = $('#content').find('#calendar-view-pane').first();
+
+                if (!$liveCalendarView.length) {
                     return;
                 }
 
-                entries.push({
-                    href,
-                    year: parseInt(match[1], 10),
-                    month: parseInt(match[2], 10),
-                    day: parseInt(match[3], 10)
-                });
-            });
+                $liveCalendarView.empty();
 
-            const monthMap = {};
-            entries.forEach(function(entry) {
-                const key = entry.year + '-' + String(entry.month).padStart(2, '0');
-                if (!monthMap[key]) {
-                    monthMap[key] = [];
-                }
-                monthMap[key].push(entry);
-            });
-
-            const monthKeys = Object.keys(monthMap).sort(function(a, b) {
-                const [aYear, aMonth] = a.split('-').map(function(part) { return parseInt(part, 10); });
-                const [bYear, bMonth] = b.split('-').map(function(part) { return parseInt(part, 10); });
-
-                if (aYear !== bYear) {
-                    return bYear - aYear;
-                }
-                return bMonth - aMonth;
-            });
-            const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-            monthKeys.forEach(function(key) {
-                const parts = key.split('-');
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10);
-                const firstDay = new Date(year, month - 1, 1).getDay();
-                const daysInMonth = new Date(year, month, 0).getDate();
-                const monthName = new Date(year, month - 1, 1).toLocaleString(undefined, { month: 'long' });
-                const dayLinkMap = {};
-
-                monthMap[key].forEach(function(entry) {
-                    dayLinkMap[entry.day] = entry.href;
+                Object.keys(diaryEntryMetadata).forEach(function(key) {
+                    delete diaryEntryMetadata[key];
                 });
 
-                const $month = $('<section class="diary-month"></section>');
-                $month.append('<h3 class="diary-month-title">' + monthName + ' ' + year + '</h3>');
-
-                const $grid = $('<div class="diary-month-grid"></div>');
-
-                weekdayNames.forEach(function(dayName) {
-                    $grid.append('<div class="diary-weekday">' + dayName + '</div>');
-                });
-
-                for (let i = 0; i < firstDay; i += 1) {
-                    $grid.append('<div class="diary-day-cell empty"></div>');
-                }
-
-                for (let day = 1; day <= daysInMonth; day += 1) {
-                    const href = dayLinkMap[day];
-                    if (href) {
-                        $grid.append('<div class="diary-day-cell"><a href="' + href + '">' + day + '</a></div>');
-                    } else {
-                        $grid.append('<div class="diary-day-cell">' + day + '</div>');
+                entries.forEach(function(entry) {
+                    diaryEntryMetadata[entry.day] = entry;
+                    const key = entry.year + '-' + String(entry.month).padStart(2, '0');
+                    if (!monthMap[key]) {
+                        monthMap[key] = [];
                     }
-                }
+                    monthMap[key].push(entry);
+                });
 
-                $month.append($grid);
-                $calendarView.append($month);
-            });
+                const monthKeys = Object.keys(monthMap).sort(function(a, b) {
+                    const [aYear, aMonth] = a.split('-').map(function(part) { return parseInt(part, 10); });
+                    const [bYear, bMonth] = b.split('-').map(function(part) { return parseInt(part, 10); });
+
+                    if (aYear !== bYear) {
+                        return bYear - aYear;
+                    }
+                    return bMonth - aMonth;
+                });
+
+                monthKeys.forEach(function(key) {
+                    const parts = key.split('-');
+                    const year = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10);
+                    const firstDay = new Date(year, month - 1, 1).getDay();
+                    const daysInMonth = new Date(year, month, 0).getDate();
+                    const monthName = new Date(year, month - 1, 1).toLocaleString(undefined, { month: 'long' });
+                    const dayLinkMap = {};
+
+                    monthMap[key].forEach(function(entry) {
+                        dayLinkMap[entry.date] = entry;
+                    });
+
+                    const $month = $('<section class="diary-month"></section>');
+                    $month.append('<h3 class="diary-month-title">' + monthName + ' ' + year + '</h3>');
+
+                    const $grid = $('<div class="diary-month-grid"></div>');
+
+                    weekdayNames.forEach(function(dayName) {
+                        $grid.append('<div class="diary-weekday">' + dayName + '</div>');
+                    });
+
+                    for (let i = 0; i < firstDay; i += 1) {
+                        $grid.append('<div class="diary-day-cell empty"></div>');
+                    }
+
+                    for (let day = 1; day <= daysInMonth; day += 1) {
+                        const entry = dayLinkMap[day];
+                        if (entry) {
+                            $grid.append('<div class="diary-day-cell"><a href="' + entry.href + '">' + decorateDiaryLinkLabel(entry.day, String(day)) + '</a></div>');
+                        } else {
+                            $grid.append('<div class="diary-day-cell">' + day + '</div>');
+                        }
+                    }
+
+                    $month.append($grid);
+                    $liveCalendarView.append($month);
+                });
+            }
+
+            $.getJSON(diaryJsonUrl)
+                .done(function(data) {
+                    renderDiaryCalendar(data);
+                    applyDiaryDateEmojiDecorations();
+                })
+                .fail(function() {
+                    renderDiaryCalendar(getDiaryEntriesFromDom());
+                    applyDiaryDateEmojiDecorations();
+                });
 
             let currentDiaryView = 'list';
 
@@ -579,7 +696,7 @@ div[id^='tags-'] + ul {
                 const $liveContent = $('#content');
                 const $liveCalendarView = $liveContent.find('#calendar-view-pane').first();
                 const $liveToggle = $liveContent.find('.diary-view-toggle').first();
-                const $liveListNodes = $liveCalendarView.nextAll();
+                const $liveListViewNodes = $liveContent.children('ul, div[id^="diary-"], div[id^="Diary-"], hr.year-separator');
 
                 if (!$liveCalendarView.length) {
                     return;
@@ -587,11 +704,11 @@ div[id^='tags-'] + ul {
 
                 currentDiaryView = view;
                 if (view === 'calendar') {
-                    $liveListNodes.hide();
+                    $liveListViewNodes.hide();
                     $liveCalendarView.show();
                 } else {
                     $liveCalendarView.hide();
-                    $liveListNodes.show();
+                    $liveListViewNodes.show();
                 }
 
                 updateDiaryToggleUi(view, $liveToggle);
@@ -646,15 +763,9 @@ div[id^='tags-'] + ul {
                 $icon.toggleClass('fa-chevron-right fa-chevron-down');
             });
 
-            <!-- replace date only links with emoji with calculated dates -->
-            $('a').filter(function() {
-                return /([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/u.test($(this).text());
-            }).each(function() {
-                $(this).html($(this).html().replace(/([0-9]{4}-[0-9]{2}-[0-9]{2})\s*(\u{1F5D3}\u{FE0F}?|\u{1F4C5})/ug, function(match, group1) {
-                    var dayOfMonth = new Date(group1).getDate();
-                    return `${group1} <span class="calendar-emoji">🗓️ <span class="day">${dayOfMonth}</span></span>`
-                }))
-            });
+            if (document.title !== 'diary') {
+                applyDiaryDateEmojiDecorations();
+            }
         });
 
         $('table').each(function() {
